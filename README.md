@@ -23,6 +23,7 @@ An automated, scalable, and production-ready REST API for Sinhala Sentiment Anal
 ## 🌟 Key Features
 
 - **🧠 Native Sinhala NLP:** Utilizes `keshan/sinhala-sentiment-analysis` for accurate sentiment detection (Positive/Negative) in Sinhala text.
+- **✨ Interactive Web UI:** Features a premium, dark-mode frontend built with modern glassmorphism design, allowing users to analyze text directly in their browser.
 - **⚡ High-Performance Backend:** Built with **FastAPI** and **Uvicorn**, ensuring rapid response times, data validation via Pydantic, and automatic OpenAPI documentation.
 - **🐳 Containerized Portability:** Fully Dockerized. The model is downloaded and cached during the Docker build stage for lightning-fast container startup.
 - **⚙️ CI/CD Automation:** A robust **GitHub Actions** pipeline automatically tests the codebase and deploys the latest version to a free Hugging Face Docker Space upon merging to `main`.
@@ -79,14 +80,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 7860 --reload
 
 Once the server is running, you can access the interactive Swagger UI at: `http://localhost:7860/docs`
 
-### 1. Check Server Status
+### 1. Access the Web Interface
 - **Endpoint:** `GET /`
-- **Response:**
-  ```json
-  {
-    "message": "Welcome to the Sinhala Sentiment Analysis API. Use POST /predict to analyze text."
-  }
-  ```
+- **Description:** Returns the beautiful, interactive HTML frontend where you can type Sinhala sentences and see real-time sentiment predictions.
 
 ### 2. Predict Sentiment
 - **Endpoint:** `POST /predict`
