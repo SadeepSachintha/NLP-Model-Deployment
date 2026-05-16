@@ -22,7 +22,7 @@ jobs:
         
     - name: Run Tests
       run: |
-        pytest tests/
+        PYTHONPATH=. pytest tests/
 
   deploy-to-hf:
     needs: build-and-test
