@@ -1,76 +1,114 @@
-# Sinhala NLP API Deployment
+# 🚀 Sinhala NLP Model Deployment (Cloud-Based API)
 
-This project demonstrates the deployment of a Sinhala NLP (Sentiment Analysis) model as a scalable cloud-based API using FastAPI, Docker, and Hugging Face Spaces. It effectively combines AI model serving, Backend development, and DevOps practices.
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue?style=for-the-badge)](https://huggingface.co/)
+[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
 
-## Features
-- **AI Model**: Utilizes a fine-tuned Hugging Face transformer model (`keshan/sinhala-sentiment-analysis`) for native Sinhala text sentiment analysis.
-- **Backend**: Built with **FastAPI** for high performance, automatic documentation (Swagger UI), and validation.
-- **Containerization**: Packaged using **Docker**, ensuring consistency across environments and seamless cloud deployment.
-- **CI/CD Pipeline**: Automated testing and deployment to Hugging Face Spaces using **GitHub Actions**.
+**🔴 [Live Demo on Hugging Face Spaces](https://huggingface.co/spaces/dwssp/NLP_Model)**
 
-## Tech Stack
-- **Python 3.10**
-- **FastAPI** & **Uvicorn**
-- **Hugging Face Transformers** & **PyTorch**
-- **Docker**
-- **GitHub Actions**
-- **Hugging Face Spaces** (Free Docker Hosting)
+An automated, scalable, and production-ready REST API for Sinhala Sentiment Analysis. This project demonstrates the intersection of **AI/ML, Backend Engineering, and DevOps** by deploying a fine-tuned Hugging Face transformer model using FastAPI, Dockerized for portability, and automated via a GitHub Actions CI/CD pipeline.
 
-## Local Setup
+---
 
-### 1. Clone the repository
+## 🌟 Key Features
+
+- **🧠 Native Sinhala NLP:** Utilizes `keshan/sinhala-sentiment-analysis` for accurate sentiment detection (Positive/Negative) in Sinhala text.
+- **⚡ High-Performance Backend:** Built with **FastAPI** and **Uvicorn**, ensuring rapid response times, data validation via Pydantic, and automatic OpenAPI documentation.
+- **🐳 Containerized Portability:** Fully Dockerized. The model is downloaded and cached during the Docker build stage for lightning-fast container startup.
+- **⚙️ CI/CD Automation:** A robust **GitHub Actions** pipeline automatically tests the codebase and deploys the latest version to a free Hugging Face Docker Space upon merging to `main`.
+- **☁️ Cloud-Native Architecture:** Designed to scale and run effortlessly on any cloud provider supporting Docker (currently deployed on Hugging Face Spaces).
+
+---
+
+## 🏗️ Architecture Flow
+
+1. **Client** sends a POST request with Sinhala text to the API.
+2. **FastAPI** validates the payload.
+3. The **Transformers Pipeline** processes the text and infers sentiment.
+4. The system returns a JSON response containing the sentiment label and confidence score.
+5. All updates to the code trigger **GitHub Actions** -> Builds Docker Image -> Pushes to **HF Spaces**.
+
+---
+
+## 🚀 Getting Started Locally
+
+### Prerequisites
+- Python 3.10+
+- Docker (Optional but recommended)
+
+### Option 1: Run via Docker (Recommended)
 ```bash
-git clone <your-repo-url>
+# 1. Clone the repository
+git clone https://github.com/yourusername/sinhala-nlp-deployment.git
 cd "NLP + Deployment"
-```
 
-### 2. Run with Docker (Recommended)
-```bash
+# 2. Build the Docker image (This will download the ML model)
 docker build -t sinhala-nlp-api .
+
+# 3. Run the container
 docker run -p 7860:7860 sinhala-nlp-api
 ```
-The API will be available at `http://localhost:7860`.
+*The API is now running at `http://localhost:7860`*
 
-### 3. Run with Python Virtual Environment
+### Option 2: Run via Python Virtual Environment
 ```bash
+# 1. Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Start the FastAPI server
 uvicorn app.main:app --host 0.0.0.0 --port 7860 --reload
 ```
 
-## API Endpoints
+---
 
-### 1. Root Endpoint
-- **URL**: `/`
-- **Method**: `GET`
-- **Response**: Welcome message.
+## 📖 API Documentation
+
+Once the server is running, you can access the interactive Swagger UI at: `http://localhost:7860/docs`
+
+### 1. Check Server Status
+- **Endpoint:** `GET /`
+- **Response:**
+  ```json
+  {
+    "message": "Welcome to the Sinhala Sentiment Analysis API. Use POST /predict to analyze text."
+  }
+  ```
 
 ### 2. Predict Sentiment
-- **URL**: `/predict`
-- **Method**: `POST`
-- **Body**: JSON containing Sinhala text.
-```json
-{
-  "text": "මෙය ඉතා හොඳ නිර්මාණයක්."
-}
-```
-- **Response**: JSON containing the sentiment label and score.
-```json
-{
-  "label": "LABEL_1",
-  "score": 0.987654321
-}
-```
-> *Note: Model labels might vary (e.g., `LABEL_0` for Negative, `LABEL_1` for Positive, or explicit strings like `Positive`, depending on the specific model used).*
+- **Endpoint:** `POST /predict`
+- **Payload:**
+  ```json
+  {
+    "text": "මෙය ඉතා හොඳ නිර්මාණයක්."
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "label": "LABEL_1",
+    "score": 0.987654321
+  }
+  ```
 
-## CI/CD Deployment
-This repository is configured with a GitHub Actions workflow `.github/workflows/deploy.yml`. 
-To enable automatic deployment to your Hugging Face Space:
-1. Create a **Docker Space** on Hugging Face.
-2. Go to your GitHub Repository Settings > Secrets and variables > Actions.
-3. Add the following Repository Secrets:
-   - `HF_TOKEN`: Your Hugging Face Access Token (with Write permissions).
+---
+
+## 🚢 CI/CD Deployment Guide
+
+This project is pre-configured to deploy automatically to **Hugging Face Spaces**.
+
+1. Create a free **Docker Space** on [Hugging Face](https://huggingface.co/spaces).
+2. Navigate to your GitHub repository **Settings > Secrets and variables > Actions**.
+3. Add the following repository secrets:
+   - `HF_TOKEN`: Your Hugging Face Access Token.
    - `HF_USERNAME`: Your Hugging Face username.
-   - `HF_SPACE_NAME`: The name of the Space you created.
-4. Any push to the `main` branch will automatically run tests and deploy to your Space.
+   - `HF_SPACE_NAME`: The name of the space you created.
+4. Push your code to the `main` branch. The GitHub Action will automatically run tests, build the Docker container, and deploy!
+
+---
+*Developed as a demonstration of scalable ML deployment pipelines.*
