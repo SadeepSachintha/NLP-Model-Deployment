@@ -5,13 +5,8 @@ import os
 
 logger = logging.getLogger(__name__)
 
-# Login with token if available
-hf_token = os.environ.get("HF_TOKEN")
-if hf_token:
-    login(token=hf_token)
-
 # Using a robust Sinhala sentiment analysis model from Hugging Face
-MODEL_NAME = "keshan/sinhala-sentiment-analysis"
+MODEL_NAME = "sinhala-nlp/sinhala-sentiment-analysis-sinbert-small"
 sentiment_pipeline = None
 
 def load_model():
