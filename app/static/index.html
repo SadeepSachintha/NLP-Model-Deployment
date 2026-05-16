@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinhala Sentiment Analysis API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --positive: #10b981;
+            --negative: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea::placeholder {
+            color: #475569;
+        }
+
+        button {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .result-container.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .sentiment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .sentiment-label {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .positive { color: var(--positive); }
+        .negative { color: var(--negative); }
+
+        .confidence-wrapper {
+            margin-top: 1rem;
+        }
+
+        .confidence-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 0%;
+        }
+
+        .progress-fill.positive { background: var(--positive); box-shadow: 0 0 10px var(--positive); }
+        .progress-fill.negative { background: var(--negative); box-shadow: 0 0 10px var(--negative); }
+
+        .error-message {
+            color: var(--negative);
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Sinhala Sentiment Analysis</h1>
+            <p class="subtitle">AI-powered sentiment detection for Sinhala text</p>
+        </div>
+
+        <div class="input-group">
+            <textarea id="textInput" placeholder="සිංහල වාක්‍යයක් මෙහි ඇතුලත් කරන්න... (Enter a Sinhala sentence here...)"></textarea>
+        </div>
+
+        <button id="analyzeBtn" onclick="analyzeSentiment()">
+            <span>Analyze Sentiment</span>
+            <div class="loader" id="loader"></div>
+        </button>
+
+        <div id="errorMsg" class="error-message"></div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="sentiment-header">
+                <span class="sentiment-label" id="sentimentLabel"></span>
+                <span id="sentimentEmoji" style="font-size: 1.5rem;"></span>
+            </div>
+            
+            <div class="confidence-wrapper">
+                <div class="confidence-header">
+                    <span>Confidence Score</span>
+                    <span id="confidenceText">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeSentiment() {
+            const textInput = document.getElementById('textInput').value.trim();
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loader = document.getElementById('loader');
+            const btnText = analyzeBtn.querySelector('span');
+            const resultContainer = document.getElementById('resultContainer');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (!textInput) {
+                errorMsg.textContent = "Please enter some text to analyze.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Reset UI
+            errorMsg.style.display = 'none';
+            resultContainer.classList.remove('show');
+            document.getElementById('progressFill').style.width = '0%';
+            
+            // Loading state
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            analyzeBtn.disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textInput })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to analyze sentiment.');
+                }
+
+                const data = await response.json();
+                displayResult(data);
+
+            } catch (error) {
+                errorMsg.textContent = error.message || "An error occurred during analysis.";
+                errorMsg.style.display = 'block';
+            } finally {
+                // Remove loading state
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayResult(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            const sentimentLabel = document.getElementById('sentimentLabel');
+            const sentimentEmoji = document.getElementById('sentimentEmoji');
+            const confidenceText = document.getElementById('confidenceText');
+            const progressFill = document.getElementById('progressFill');
+
+            // Determine if positive or negative
+            // Assume LABEL_1 is positive and LABEL_0 is negative based on common conventions
+            const isPositive = data.label === 'LABEL_1' || data.label.toLowerCase() === 'positive';
+            const confidence = (data.score * 100).toFixed(1);
+
+            // Update DOM
+            sentimentLabel.textContent = isPositive ? 'Positive Sentiment' : 'Negative Sentiment';
+            sentimentLabel.className = `sentiment-label ${isPositive ? 'positive' : 'negative'}`;
+            sentimentEmoji.textContent = isPositive ? '✨' : '⚠️';
+            
+            confidenceText.textContent = `${confidence}%`;
+            
+            progressFill.className = `progress-fill ${isPositive ? 'positive' : 'negative'}`;
+            
+            // Show container
+            resultContainer.classList.add('show');
+            
+            // Animate progress bar slightly after showing container
+            setTimeout(() => {
+                progressFill.style.width = `${confidence}%`;
+            }, 50);
+        }
+
+        // Allow Enter key to submit (Shift+Enter for new line)
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                analyzeSentiment();
+            }
+        });
+    </script>
+</body>
+</html>

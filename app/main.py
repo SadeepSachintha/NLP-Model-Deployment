@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from app.model import predict_sentiment, load_model
 import logging
@@ -11,6 +13,9 @@ app = FastAPI(
     description="A robust REST API for predicting sentiment of Sinhala text.",
     version="1.0.0"
 )
+
+# Mount the static directory to serve CSS, JS, etc. if needed later, but mostly for the index.html
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 class SentimentRequest(BaseModel):
     text: str
@@ -29,9 +34,10 @@ async def startup_event():
         logger.error(f"Failed to load model on startup: {e}")
         raise
 
-@app.get("/")
+@app.get("/", response_class=FileResponse)
 def read_root():
-    return {"message": "Welcome to the Sinhala Sentiment Analysis API. Use POST /predict to analyze text."}
+    """Serve the frontend UI."""
+    return "app/static/index.html"
 
 @app.post("/predict", response_model=SentimentResponse)
 def predict(request: SentimentRequest):

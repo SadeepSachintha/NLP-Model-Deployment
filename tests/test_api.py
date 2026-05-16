@@ -15,7 +15,8 @@ def client():
 def test_read_root(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert "Welcome" in response.json()["message"]
+    assert "text/html" in response.headers["content-type"]
+    assert "Sinhala Sentiment Analysis API" in response.text
 
 def test_predict_sentiment_positive(client):
     # "This is a very good creation." in Sinhala
