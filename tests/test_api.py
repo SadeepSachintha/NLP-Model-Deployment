@@ -1,11 +1,16 @@
 from fastapi.testclient import TestClient
 from app.main import app
 import pytest
+from unittest.mock import patch
 
 @pytest.fixture(scope="module")
 def client():
-    with TestClient(app) as c:
-        yield c
+    # Mock the model loading and prediction during tests
+    with patch('app.main.load_model'):
+        with patch('app.main.predict_sentiment') as mock_predict:
+            mock_predict.return_value = {"label": "POSITIVE", "score": 0.95}
+            with TestClient(app) as c:
+                yield c
 
 def test_read_root(client):
     response = client.get("/")
