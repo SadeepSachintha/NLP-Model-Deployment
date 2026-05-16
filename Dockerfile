@@ -23,7 +23,8 @@ COPY --chown=user . $HOME/app
 
 # Pre-download the Hugging Face model during the build stage
 # This saves time and bandwidth during container startup
-RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='keshan/sinhala-sentiment-analysis')"
+RUN --mount=type=secret,id=HF_TOKEN,mode=0444,required=true \
+    python -c "import os; from transformers import pipeline; token = open('/run/secrets/HF_TOKEN').read().strip(); pipeline('sentiment-analysis', model='keshan/sinhala-sentiment-analysis', token=token)"
 
 # Make port 7860 available to the world outside this container
 EXPOSE 7860
