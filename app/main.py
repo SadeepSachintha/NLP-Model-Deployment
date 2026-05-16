@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from app.model import predict_sentiment
+from app.model import predict_sentiment, load_model
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +18,16 @@ class SentimentRequest(BaseModel):
 class SentimentResponse(BaseModel):
     label: str
     score: float
+
+@app.on_event("startup")
+async def startup_event():
+    """Load the model when the app starts."""
+    try:
+        load_model()
+        logger.info("Model loaded successfully on startup")
+    except Exception as e:
+        logger.error(f"Failed to load model on startup: {e}")
+        raise
 
 @app.get("/")
 def read_root():
